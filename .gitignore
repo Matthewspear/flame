@@ -51,3 +51,7 @@ src/utilities/common_lcmtypes/src
 *.cproject
 *.project
 *.settings
+
+# macOS system
+.DS_Store
+
