@@ -24,7 +24,11 @@
 
 #include <unistd.h>
 
+#ifdef __linux__
 #include <asm/param.h> // For the Jiffy constant HZ.
+#else
+#define HZ 100
+#endif
 
 #include <chrono>
 #include <string>

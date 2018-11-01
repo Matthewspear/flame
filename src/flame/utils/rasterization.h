@@ -20,7 +20,13 @@
  * @date 2017-08-18 19:05:08 (Fri)
  */
 
+#ifdef __SSE__
 #include <emmintrin.h>
+#endif
+
+#ifdef __ARM_NEON__
+#include "SSE2NEON.h"
+#endif
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

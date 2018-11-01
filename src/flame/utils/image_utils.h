@@ -33,6 +33,10 @@
 #include <smmintrin.h>
 #endif
 
+#ifdef __ARM_NEON__
+#include "SSE2NEON.h"
+#endif
+
 #include <Eigen/Dense>
 
 #include <opencv2/core/core.hpp>
