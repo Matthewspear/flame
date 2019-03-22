@@ -30,6 +30,7 @@
 #include <atomic>
 
 #include <opencv2/highgui/highgui.hpp>
+#include <os/signpost.h>
 
 #include "flame/stereo/epipolar_geometry.h"
 
@@ -95,6 +96,11 @@ Flame::Flame(int width, int height,
     debug_img_matches_(height, width),
     debug_img_normals_(height, width),
     debug_img_idepthmap_(height, width) {
+        
+    os_log_t log = os_log_create("uk.co.matthewspear.FLaME", "FLaME Internal");
+    os_signpost_id_t spid = os_signpost_id_generate(log);
+    os_signpost_event_emit(log, spid, "FLaME Constructor");
+        
   // Start graph optimization thread.
   if (params_.do_nltgv2) {
     graph_thread_ = std::thread([this]() {
@@ -129,6 +135,11 @@ bool Flame::update(double time, uint32_t img_id,
                    const Image1b& img_new,
                    bool is_poseframe,
                    const Image1f& idepths_true) {
+    
+    os_log_t log = os_log_create("uk.co.matthewspear.FLaME", "FLaME Internal");
+    os_signpost_id_t spid = os_signpost_id_generate(log);
+    os_signpost_interval_begin(log, spid, "FLaME Update", "%d", img_id);
+    
   stats_.tick("update");
 
   stats_.tick("update_locking");
@@ -168,6 +179,7 @@ bool Flame::update(double time, uint32_t img_id,
 
   if (num_imgs_ < 2) {
     // Don't do anything until we have 2 images.
+    os_signpost_interval_end(log, spid, "FLaME Update", "Failed – Not enough images");
     return false;
   }
 
@@ -251,6 +263,7 @@ bool Flame::update(double time, uint32_t img_id,
   if ((feats_.size() == 0) && (new_feats_.size() == 0)) {
     // No features to add.
     new_feats_mtx_.unlock();
+    os_signpost_interval_end(log, spid, "FLaME Update", "Failed – No features to add");
     return false;
   }
 
@@ -286,6 +299,7 @@ bool Flame::update(double time, uint32_t img_id,
     }
     // Clear everything.
     clear();
+    os_signpost_interval_end(log, spid, "FLaME Update", "Failed – Not enough detection");
     return false;
   }
 
@@ -322,6 +336,7 @@ bool Flame::update(double time, uint32_t img_id,
     if (!params_.debug_quiet) {
       fprintf(stderr, "Flame[Error]: Could not synchronize graph with features.\n");
     }
+    os_signpost_interval_end(log, spid, "FLaME Update", "Failed – Not enough detection");
     return false;
   }
 
@@ -358,6 +373,7 @@ bool Flame::update(double time, uint32_t img_id,
 
   if (triangles_curr_.size() == 0) {
     // No triangles.
+    os_signpost_interval_end(log, spid, "FLaME Update", "Failed – No triangles");
     return false;
   }
 
@@ -548,6 +564,7 @@ bool Flame::update(double time, uint32_t img_id,
            stats_.stats("fps_max"), stats_.stats("fps"));
   }
 
+  os_signpost_interval_end(log, spid, "FLaME Update", "Success");
   return true;
 }
 
