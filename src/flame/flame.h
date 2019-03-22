@@ -512,7 +512,9 @@ class Flame final {
   std::recursive_mutex update_mtx_;
 
   // PoseFrames.
+public:
   FrameIDToFrame pfs_; // Main container for pfs.
+private:
   std::mutex pfs_mtx_; // Locks pfs_ container.
   utils::Frame::Ptr curr_pf_; // Pointer to the current poseframe.
 
